@@ -181,6 +181,38 @@ export default function Projects() {
 
           {/* Other Categories */}
           <div>
+            <h2 className="text-2xl font-semibold dark:text-(--accent) mb-4">Web Development</h2>
+            <div className="flex flex-col gap-6 mb-8">
+              <Card variant="sub">
+                <h3 className="text-lg font-medium mb-3 dark:text-(--accent)">Node.js Web Application</h3>
+                <div className="mb-4 rounded-lg overflow-hidden bg-background/50 border border-(--accent)/20">
+                  <iframe
+                    src="YOUR_WEBSITE_URL_HERE"
+                    className="w-full h-[600px] border-0"
+                    title="Node.js Web Application"
+                    sandbox="allow-scripts allow-same-origin allow-forms"
+                  />
+                </div>
+                <p className="text-sm dark:text-(--muted) mb-4">
+                  Full-stack web application built with Node.js, Handlebars templating, and Fomantic UI for a modern, responsive interface.
+                </p>
+                <a
+                  href="YOUR_WEBSITE_URL_HERE"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full inline-flex justify-center items-center gap-2 px-4 py-3 rounded-lg bg-(--accent) text-(--accent-on) hover:bg-(--accent-strong) transition-all text-base font-medium"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                  Open Full Site
+                </a>
+              </Card>
+            </div>
+          </div>
+
+          {/* Other Skills */}
+          <div>
             <h2 className="text-2xl font-semibold dark:text-(--accent) mb-4">Other Skills</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               <Card variant="sub" className="group">
