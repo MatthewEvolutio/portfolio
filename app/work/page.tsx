@@ -1,12 +1,28 @@
+"use client";
+
 import Card from "../components/Card";
 import Image from "next/image";
 import { assetUrl } from "@/lib/utils";
+import { useState, useEffect } from "react";
 
 export default function Work() {
+  const [hasScrolled, setHasScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setHasScrolled(window.scrollY > 30);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   return (
-    <div className="flex min-h-screen items-start justify-center font-sans dark:bg-background px-4 py-12">
-      <main className="w-full max-w-5xl flex flex-col gap-8">
-        <Card className="w-full">
+    <div className="flex items-start justify-center font-sans dark:bg-background -mt-2">
+      <main className="flex w-full max-w-5xl flex-col items-center sm:items-start px-4 gap-8">
+        <Card className={`w-full transition-all duration-500 origin-top ${
+          hasScrolled ? 'scale-100' : 'scale-105'
+        }`}>
           <h1 className="text-3xl font-semibold leading-10 tracking-tight dark:text-(--accent) mb-6">
             Work Experience
           </h1>

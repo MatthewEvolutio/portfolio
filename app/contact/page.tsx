@@ -11,6 +11,7 @@ export default function Contact() {
   const emailJsPublicKey = EMAILJS_PUBLIC_KEY as string | undefined;
   const emailJsServiceId = EMAILJS_SERVICE_ID as string | undefined;
   const emailJsTemplateId = EMAILJS_TEMPLATE_ID as string | undefined;
+  const [hasScrolled, setHasScrolled] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -30,6 +31,15 @@ export default function Contact() {
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setHasScrolled(window.scrollY > 30);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -90,9 +100,11 @@ export default function Contact() {
   };
 
   return (
-    <div className="flex min-h-screen items-start justify-center font-sans dark:bg-background px-4 py-12">
-      <main className="w-full max-w-3xl flex flex-col gap-8">
-        <Card className="w-full">
+    <div className="flex items-start justify-center font-sans dark:bg-background -mt-2">
+      <main className="flex w-full max-w-3xl flex-col items-center sm:items-start px-4 gap-8">
+        <Card className={`w-full transition-all duration-500 origin-top ${
+          hasScrolled ? 'scale-100' : 'scale-105'
+        }`}>
           <h1 className="text-3xl font-semibold leading-10 tracking-tight dark:text-(--accent) mb-6">
             Get in Touch
           </h1>
