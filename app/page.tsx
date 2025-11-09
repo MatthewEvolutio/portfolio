@@ -39,7 +39,7 @@ export default function Home() {
   const [isPortrait, setIsPortrait] = useState(false);
   const heroRef = useRef<HTMLDivElement>(null);
   const [scrollHintBottom, setScrollHintBottom] = useState(24);
-
+ 
   // Calculate age based on birthday: May 13, 2002
   const myAge = calculateAge(new Date(2002, 4, 13)); // Month is 0-indexed, so 4 = May
 
@@ -106,7 +106,9 @@ export default function Home() {
             <div className="flex-1">
               <h1 className="max-w-s text-3xl font-semibold leading-10 tracking-tight dark:text-(--accent) mb-4">
                 Matthew Horan Portfolio
-              </h1>
+                </h1>
+                <Image src={`${process.env.NODE_ENV === 'production' ? '/portfolio/me.jpg' : '/me.jpg'}`} alt="Matthew Horan"/>
+
               <Card variant="sub">
                 <p className="max-w-md text-lg leading-8 dark:text-muted">
                   A motivated and curious Computing Student studying{" "}
