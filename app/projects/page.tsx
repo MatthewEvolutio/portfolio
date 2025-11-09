@@ -10,8 +10,10 @@ import { useState, useEffect, useRef } from "react";
 export default function Projects() {
   const [activePdf, setActivePdf] = useState<string | null>(null);
   const [activeImage, setActiveImage] = useState<string | null>(null);
+  const [activeWebApp, setActiveWebApp] = useState<boolean>(false);
   const [hasScrolled, setHasScrolled] = useState(false);
   const nodeIframeRef = useRef<HTMLIFrameElement | null>(null);
+  const modalIframeRef = useRef<HTMLIFrameElement | null>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -76,6 +78,55 @@ export default function Projects() {
       window.removeEventListener('storage', onStorage);
     };
   }, []);
+
+  // Sync theme to modal iframe as well
+  useEffect(() => {
+    const iframe = modalIframeRef.current;
+    if (!iframe || !activeWebApp) return;
+
+    const getThemeClass = () => {
+      const classes = Array.from(document.body.classList);
+      return classes.find((c) => c.startsWith('theme-')) || '';
+    };
+
+    const gatherVars = () => {
+      const cs = getComputedStyle(document.body);
+      const keys = ['--background', '--foreground', '--accent', '--accent-strong', '--accent-on', '--muted', '--btn-hover'];
+      const vars: Record<string, string> = {};
+      keys.forEach(k => {
+        vars[k] = cs.getPropertyValue(k).trim();
+      });
+      return vars;
+    };
+
+    const postTheme = () => {
+      try {
+        const themeClass = getThemeClass();
+        const vars = gatherVars();
+        iframe.contentWindow?.postMessage({ type: 'set-theme', themeClass, vars }, '*');
+      } catch {}
+    };
+
+    const onLoad = () => postTheme();
+    iframe.addEventListener('load', onLoad);
+
+    const observer = new MutationObserver(postTheme);
+    observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === 'theme-index') postTheme();
+    };
+    window.addEventListener('storage', onStorage);
+
+    const t = setTimeout(postTheme, 100);
+
+    return () => {
+      clearTimeout(t);
+      iframe.removeEventListener('load', onLoad);
+      observer.disconnect();
+      window.removeEventListener('storage', onStorage);
+    };
+  }, [activeWebApp]);
 
   return (
     <div className="flex items-start justify-center font-sans dark:bg-background -mt-2 mb-8">
@@ -253,17 +304,15 @@ export default function Projects() {
                 <p className="text-sm dark:text-(--muted) mb-4">
                   Full-stack web application built with Node.js, Handlebars templating, and Fomantic UI for a modern, responsive interface.
                 </p>
-                <a
-                  href="https://webapp-phi-sooty.vercel.app/start"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <button
+                  onClick={() => setActiveWebApp(true)}
                   className="w-full inline-flex justify-center items-center gap-2 px-4 py-3 rounded-lg bg-(--accent) text-(--accent-on) hover:bg-(--accent-strong) transition-all text-base font-medium"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                   </svg>
                   Open Full Site
-                </a>
+                </button>
               </Card>
             </div>
           </div>
@@ -347,6 +396,38 @@ export default function Projects() {
                 onClick={() => setActiveImage(null)}
                 className="shrink-0 h-10 w-10 flex items-center justify-center rounded-full bg-background text-(--accent) hover:bg-(--accent) hover:text-background transition-all shadow-lg ring-2 ring-(--accent)"
                 aria-label="Close image viewer"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Web App Viewer Modal */}
+        {activeWebApp && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-background/80 p-4"
+            onClick={() => setActiveWebApp(false)}
+          >
+            <div
+              className="relative w-full h-full max-w-6xl max-h-[90vh] flex gap-4"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex-1 w-full h-full bg-background rounded-lg overflow-hidden shadow-2xl ring-2 ring-(--accent)">
+                <iframe
+                  ref={modalIframeRef}
+                  src="https://webapp-phi-sooty.vercel.app/start"
+                  className="w-full h-full border-0"
+                  title="Node.js Web Application - Full View"
+                  sandbox="allow-scripts allow-same-origin allow-forms"
+                />
+              </div>
+              <button
+                onClick={() => setActiveWebApp(false)}
+                className="shrink-0 h-10 w-10 flex items-center justify-center rounded-full bg-background text-(--accent) hover:bg-(--accent) hover:text-background transition-all shadow-lg ring-2 ring-(--accent)"
+                aria-label="Close web app viewer"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
