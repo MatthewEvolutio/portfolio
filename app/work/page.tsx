@@ -1,5 +1,6 @@
 import Card from "../components/Card";
 import Image from "next/image";
+import { assetUrl } from "@/lib/utils";
 
 export default function Work() {
   return (
@@ -19,7 +20,7 @@ export default function Work() {
                   className="shrink-0 bg-white rounded-lg p-2 ring-2 ring-(--accent) hover:scale-105 transition-transform duration-300 cursor-pointer"
                 >
                   <Image
-                    src="/evonnect.svg"
+                    src={assetUrl("/evonnect.svg")}
                     alt="Evolutio Ophthalmology"
                     width={48}
                     height={48}
@@ -43,7 +44,7 @@ export default function Work() {
                     className="bg-white rounded-lg p-2 ring-2 ring-(--accent) hover:scale-105 transition-transform duration-300 cursor-pointer"
                   >
                     <Image
-                      src="/camile.png"
+                      src={assetUrl("/camile.png")}
                       alt="Camile Thai"
                       width={48}
                       height={48}
@@ -57,7 +58,7 @@ export default function Work() {
                     className="bg-white rounded-lg p-2 ring-2 ring-(--accent) hover:scale-105 transition-transform duration-300 cursor-pointer"
                   >
                     <Image
-                      src="/image.png"
+                      src={assetUrl("/image.png")}
                       alt="Thindi"
                       width={48}
                       height={48}
@@ -82,7 +83,7 @@ export default function Work() {
                   className="shrink-0 bg-white rounded-lg p-2 ring-2 ring-(--accent) hover:scale-105 transition-transform duration-300 cursor-pointer"
                 >
                   <Image
-                    src="/mcdonalds.png"
+                    src={assetUrl("/mcdonalds.png")}
                     alt="McDonalds"
                     width={48}
                     height={48}
@@ -106,7 +107,7 @@ export default function Work() {
                   className="shrink-0 bg-white rounded-lg p-2 ring-2 ring-(--accent) hover:scale-105 transition-transform duration-300 cursor-pointer"
                 >
                   <Image
-                    src="/caravan-svgrepo-com.svg"
+                    src={assetUrl("/caravan-svgrepo-com.svg")}
                     alt="Fitzmaurices Caravan Park"
                     width={48}
                     height={48}

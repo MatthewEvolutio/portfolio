@@ -4,10 +4,11 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
 import ThemeSwitcher from "./ThemeSwitcher";
+import { assetUrl } from "@/lib/utils";
 
 export default function Nav() {
   const [showPhoto, setShowPhoto] = useState(false);
-  const [photoSrc, setPhotoSrc] = useState("/me.jpg");
+  const [photoSrc, setPhotoSrc] = useState(assetUrl("/me.jpg"));
   const [hoveredLink, setHoveredLink] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -39,7 +40,7 @@ export default function Nav() {
             width={100}
             height={100}
             className="rounded-full object-cover ring-2 ring-(--accent)"
-            onError={() => setPhotoSrc("/me-placeholder.svg")}
+            onError={() => setPhotoSrc(assetUrl("/me-placeholder.svg"))}
           />
         </div>
       </div>

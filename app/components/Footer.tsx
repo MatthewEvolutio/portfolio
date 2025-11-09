@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { assetUrl } from "@/lib/utils";
 
 export default function Footer() {
   return (
@@ -45,7 +46,7 @@ export default function Footer() {
               aria-label="GitHub"
             >
               <Image
-                src="/github.svg"
+                src={assetUrl("/github.svg")}
                 alt="GitHub"
                 width={20}
                 height={20}
@@ -60,7 +61,7 @@ export default function Footer() {
               aria-label="LinkedIn"
             >
               <Image
-                src="/linkedin.svg"
+                src={assetUrl("/linkedin.svg")}
                 alt="LinkedIn"
                 width={20}
                 height={20}
