@@ -5,12 +5,13 @@ import dynamic from "next/dynamic";
 const PdfPreview = dynamic(() => import("../components/PdfPreview"), { ssr: false });
 import Image from "next/image";
 import { assetUrl } from "@/lib/utils";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 export default function Projects() {
   const [activePdf, setActivePdf] = useState<string | null>(null);
   const [activeImage, setActiveImage] = useState<string | null>(null);
   const [hasScrolled, setHasScrolled] = useState(false);
+  const nodeIframeRef = useRef<HTMLIFrameElement | null>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -19,6 +20,61 @@ export default function Projects() {
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Sync current theme to embedded Node app via postMessage
+  useEffect(() => {
+    const iframe = nodeIframeRef.current;
+    if (!iframe) return;
+
+    const getThemeClass = () => {
+      const classes = Array.from(document.body.classList);
+      // Find one of our known theme classes
+      const found = classes.find((c) => c.startsWith('theme-')) || '';
+      return found;
+    };
+
+    const gatherVars = () => {
+      const cs = getComputedStyle(document.body);
+      const keys = ['--background', '--foreground', '--accent', '--accent-strong', '--accent-on', '--muted', '--btn-hover'];
+      const vars: Record<string, string> = {};
+      keys.forEach(k => {
+        vars[k] = cs.getPropertyValue(k).trim();
+      });
+      return vars;
+    };
+
+    const postTheme = () => {
+      try {
+        const themeClass = getThemeClass();
+        const vars = gatherVars();
+        iframe.contentWindow?.postMessage({ type: 'set-theme', themeClass, vars }, '*');
+      } catch {}
+    };
+
+    // Initial post
+    const onLoad = () => postTheme();
+    iframe.addEventListener('load', onLoad);
+
+    // Observe body class changes (ThemeSwitcher updates body classes)
+    const observer = new MutationObserver(postTheme);
+    observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+
+    // Also listen to storage changes (if theme is changed in another tab)
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === 'theme-index') postTheme();
+    };
+    window.addEventListener('storage', onStorage);
+
+    // Post once after a tick as well
+    const t = setTimeout(postTheme, 100);
+
+    return () => {
+      clearTimeout(t);
+      iframe.removeEventListener('load', onLoad);
+      observer.disconnect();
+      window.removeEventListener('storage', onStorage);
+    };
   }, []);
 
   return (
@@ -187,8 +243,9 @@ export default function Projects() {
                 <h3 className="text-lg font-medium mb-3 dark:text-(--accent)">Node.js Web Application</h3>
                 <div className="mb-4 rounded-lg overflow-hidden bg-background/50 border border-(--accent)/20">
                   <iframe
-                    src="YOUR_WEBSITE_URL_HERE"
-                    className="w-full h-[600px] border-0"
+                    ref={nodeIframeRef}
+                    src="https://webapp-phi-sooty.vercel.app/start"
+                    className="w-full h-[600px] border-0 themed-scrollbar"
                     title="Node.js Web Application"
                     sandbox="allow-scripts allow-same-origin allow-forms"
                   />
@@ -197,7 +254,7 @@ export default function Projects() {
                   Full-stack web application built with Node.js, Handlebars templating, and Fomantic UI for a modern, responsive interface.
                 </p>
                 <a
-                  href="YOUR_WEBSITE_URL_HERE"
+                  href="https://webapp-phi-sooty.vercel.app/start"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-full inline-flex justify-center items-center gap-2 px-4 py-3 rounded-lg bg-(--accent) text-(--accent-on) hover:bg-(--accent-strong) transition-all text-base font-medium"
