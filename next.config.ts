@@ -10,6 +10,12 @@ const nextConfig: NextConfig = {
   images: {
     unoptimized: true,         // GitHub Pages can't run Next image optimizer
   },
+  // Explicitly expose public runtime envs for client bundle
+  env: {
+    NEXT_PUBLIC_EMAILJS_PUBLIC_KEY: process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY,
+    NEXT_PUBLIC_EMAILJS_SERVICE_ID: process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID,
+    NEXT_PUBLIC_EMAILJS_TEMPLATE_ID: process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID,
+  },
   // Optional: silence workspace root warning
   turbopack: {
     root: __dirname,

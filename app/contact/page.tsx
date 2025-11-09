@@ -4,11 +4,13 @@ import Card from "../components/Card";
 import { assetUrl } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import emailjs from "@emailjs/browser";
+import { EMAILJS_PUBLIC_KEY, EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID } from "@/lib/emailConfig";
 
 export default function Contact() {
-  const emailJsPublicKey = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY as string | undefined;
-  const emailJsServiceId = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID as string | undefined;
-  const emailJsTemplateId = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID as string | undefined;
+  // Read from centralized config (env or literals)
+  const emailJsPublicKey = EMAILJS_PUBLIC_KEY as string | undefined;
+  const emailJsServiceId = EMAILJS_SERVICE_ID as string | undefined;
+  const emailJsTemplateId = EMAILJS_TEMPLATE_ID as string | undefined;
   const [formData, setFormData] = useState({
     name: "",
     email: "",
