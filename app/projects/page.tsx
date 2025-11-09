@@ -141,11 +141,11 @@ export default function Projects() {
 
         {/* PDF Viewer Modal */}
         {activePdf && (
-          <div 
+          <div
             className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-background/80 p-4"
             onClick={() => setActivePdf(null)}
           >
-            <div 
+            <div
               className="relative w-full h-full max-w-6xl max-h-[90vh]"
               onClick={(e) => e.stopPropagation()}
             >
