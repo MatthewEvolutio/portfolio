@@ -35,6 +35,13 @@ export default function Contact() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formEl = e.currentTarget; // capture before any awaits
+    // Honeypot check: if hidden field is filled, treat as success but skip sending
+    const honeypot = (formEl.querySelector('input[name="website"]') as HTMLInputElement | null)?.value;
+    if (honeypot) {
+      // Silently pretend success to mislead bots
+      setSubmitStatus("success");
+      return;
+    }
     setIsSubmitting(true);
     setSubmitStatus("idle");
     try {
@@ -165,6 +172,15 @@ export default function Contact() {
               </div>
             )}
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+              {/* Honeypot field (bots often fill all inputs) */}
+              <input
+                type="text"
+                name="website"
+                tabIndex={-1}
+                autoComplete="off"
+                className="hidden"
+                aria-hidden="true"
+              />
               <div>
                 <label htmlFor="name" className="block text-sm font-medium dark:text-(--accent) mb-2">
                   Name
