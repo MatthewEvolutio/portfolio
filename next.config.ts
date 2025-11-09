@@ -7,7 +7,7 @@ const nextConfig: NextConfig = {
   basePath: isProd ? `/${repoName}` : '',
   assetPrefix: isProd ? `/${repoName}/` : '',
   images: {
-    unoptimized: true, // required for GitHub Pages
+    unoptimized: true,
   },
 }
 
