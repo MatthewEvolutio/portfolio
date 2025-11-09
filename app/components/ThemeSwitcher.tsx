@@ -8,6 +8,11 @@ const themes = [
     className: "theme-solarized-dark",
   },
   {
+    name: "Lunar Dark",
+    key: "dark",
+    className: "theme-dark",
+  },
+  {
     name: "Solarized Light",
     key: "solarized-light",
     className: "theme-solarized-light",
@@ -16,11 +21,6 @@ const themes = [
     name: "Lunar Light",
     key: "light",
     className: "theme-light",
-  },
-  {
-    name: "Lunar Dark",
-    key: "dark",
-    className: "theme-dark",
   },
 ];
 
