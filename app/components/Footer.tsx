@@ -37,36 +37,44 @@ export default function Footer() {
           </nav>
 
           {/* Right section - Social links */}
-          <div className="flex gap-4">
+          <div className="flex flex-col items-center sm:items-end gap-3">
+            <div className="flex gap-4">
+              <a
+                href="https://github.com/MatthewEvolutio"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="social-btn flex h-10 w-10 items-center justify-center rounded-full bg-foreground text-[#002b36] transition-all duration-300 hover:scale-[1.05] hover:bg-(--btn-hover) dark:bg-(--accent) dark:text-[#002b36] dark:hover:bg-(--accent-strong)"
+                aria-label="GitHub"
+              >
+                <Image
+                  src={assetUrl("/github.svg")}
+                  alt="GitHub"
+                  width={20}
+                  height={20}
+                  className="social-icon brightness-0 dark:brightness-0"
+                />
+              </a>
+              <a
+                href="https://www.linkedin.com/in/matthew-horan-9a4216202/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="social-btn flex h-10 w-10 items-center justify-center rounded-full bg-foreground text-[#002b36] transition-all duration-300 hover:scale-[1.05] hover:bg-(--btn-hover) dark:bg-(--accent) dark:text-[#002b36] dark:hover:bg-(--accent-strong)"
+                aria-label="LinkedIn"
+              >
+                <Image
+                  src={assetUrl("/linkedin.svg")}
+                  alt="LinkedIn"
+                  width={20}
+                  height={20}
+                  className="social-icon brightness-0 dark:brightness-0"
+                />
+              </a>
+            </div>
             <a
-              href="https://github.com/MatthewEvolutio"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="social-btn flex h-10 w-10 items-center justify-center rounded-full bg-foreground text-[#002b36] transition-all duration-300 hover:scale-[1.05] hover:bg-(--btn-hover) dark:bg-(--accent) dark:text-[#002b36] dark:hover:bg-(--accent-strong)"
-              aria-label="GitHub"
+              href="mailto:matthewhoran27@gmail.com"
+              className="text-sm dark:text-(--muted) hover:text-(--accent) transition-colors"
             >
-              <Image
-                src={assetUrl("/github.svg")}
-                alt="GitHub"
-                width={20}
-                height={20}
-                className="social-icon brightness-0 dark:brightness-0"
-              />
-            </a>
-            <a
-              href="https://www.linkedin.com/in/matthew-horan-9a4216202/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="social-btn flex h-10 w-10 items-center justify-center rounded-full bg-foreground text-[#002b36] transition-all duration-300 hover:scale-[1.05] hover:bg-(--btn-hover) dark:bg-(--accent) dark:text-[#002b36] dark:hover:bg-(--accent-strong)"
-              aria-label="LinkedIn"
-            >
-              <Image
-                src={assetUrl("/linkedin.svg")}
-                alt="LinkedIn"
-                width={20}
-                height={20}
-                className="social-icon brightness-0 dark:brightness-0"
-              />
+              matthewhoran27@gmail.com
             </a>
           </div>
         </div>
