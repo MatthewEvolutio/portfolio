@@ -4,7 +4,7 @@ import { assetUrl } from "@/lib/utils";
 
 export default function Footer() {
   return (
-    <footer className="w-full border-t border-(--accent)/20 mt-auto">
+    <footer className="w-full mt-auto">
       <div className="max-w-6xl mx-auto px-4 py-8">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
           {/* Left section - Name and copyright */}

@@ -22,7 +22,7 @@ export default function Projects() {
   }, []);
 
   return (
-    <div className="flex items-start justify-center font-sans dark:bg-background -mt-2">
+    <div className="flex items-start justify-center font-sans dark:bg-background -mt-2 mb-8">
       <main className="flex w-full max-w-5xl flex-col items-center sm:items-start px-4 gap-8">
         <Card className={`w-full transition-all duration-500 origin-top ${
           hasScrolled ? 'scale-100' : 'scale-105'
