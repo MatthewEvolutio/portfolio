@@ -1,26 +1,140 @@
 @import "tailwindcss";
 
+html {
+  scroll-behavior: smooth;
+}
+
+
+/* Default theme: Solarized Dark (for legacy support) */
 :root {
+  --background: #002b36;
+  --foreground: #839496;
+  --accent: #b58900;
+  --accent-strong: #cb4b16;
+  --accent-on: #002b36;
+  --muted: #93a1a1;
+  --btn-hover: #073642;
+}
+
+/* Theme: Solarized Dark */
+.theme-solarized-dark {
+  --background: #002b36;
+  --foreground: #839496;
+  --accent: #b58900;
+  --accent-strong: #cb4b16;
+  --accent-on: #002b36;
+  --muted: #93a1a1;
+  --btn-hover: #073642;
+}
+
+/* Theme: Solarized Light */
+.theme-solarized-light {
+  --background: #fdf6e3;
+  --foreground: #657b83;
+  --accent: #b58900;
+  --accent-strong: #cb4b16;
+  --accent-on: #fdf6e3;
+  --muted: #586e75;
+  --btn-hover: #eee8d5;
+}
+
+/* Theme: Light */
+.theme-light {
   --background: #ffffff;
   --foreground: #171717;
+  --accent: #2563eb;
+  --accent-strong: #032581;
+  --accent-on: #ffffff;
+  --muted: #525252;
+  --btn-hover: #e5e7eb;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* Light theme icon/text overrides */
+.theme-light .social-btn,
+.theme-light .home-action {
+  color: var(--background) !important;
+  background: var(--accent) !important;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.theme-light .social-icon,
+.theme-light .home-icon {
+  filter: brightness(0) invert(1) !important;
 }
+
+/* Hover states for light theme social/home buttons */
+.theme-light .social-btn:hover,
+.theme-light .home-action:hover {
+  background: var(--accent-strong) !important;
+}
+
+/* Solarized Light icon/text overrides */
+.theme-solarized-light .social-btn,
+.theme-solarized-light .home-action {
+  color: var(--background) !important;
+  background: var(--accent) !important;
+}
+
+.theme-solarized-light .social-icon,
+.theme-solarized-light .home-icon {
+  filter: brightness(0) invert(1) !important;
+}
+
+/* Hover states for solarized light social/home buttons */
+.theme-solarized-light .social-btn:hover,
+.theme-solarized-light .home-action:hover {
+  background: var(--accent-strong) !important;
+}
+
+/* Theme: Dark */
+.theme-dark {
+  --background: #18181b;
+  --foreground: #e5e5e5;
+  --accent: #2563eb;
+  --accent-strong: #1d4ed8;
+  --accent-on: #18181b;
+  --muted: #a1a1aa;
+  --btn-hover: #27272a;
+}
+
+/* Removed unsupported @theme rule */
+
+
+/* To use a theme, add the corresponding class to <html> or <body>:
+   <html class="theme-solarized-dark">, <html class="theme-solarized-light">, etc. */
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Utility: color any monochrome SVG via CSS mask using currentColor */
+.mask-icon {
+  display: inline-block;
+  background-color: currentColor;
+  -webkit-mask-image: var(--icon-url);
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  -webkit-mask-size: contain;
+  mask-image: var(--icon-url);
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: contain;
+}
+
+/* When in portrait (vertical) aspect ratio, absolutely center the nav logo
+   so it appears in the middle of the top bar. This preserves the normal
+   layout in landscape. */
+@media (orientation: portrait) {
+  .nav-portrait {
+    /* keep nav as flex but allow absolute children to center */
+    position: relative;
+  }
+
+  .nav-portrait .logo-center {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
 }
