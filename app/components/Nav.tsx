@@ -58,7 +58,7 @@ export default function Nav() {
 
       {/* Mobile dropdown menu */}
       <div className={`sm:hidden absolute top-20 left-1/2 -translate-x-1/2 w-full max-w-3xl transition-all duration-300 z-50 ${mobileMenuOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2'}`}>
-        <div className="bg-background rounded-2xl shadow-lg border ring-2 ring-(--accent) hover:shadow-xl hover:ring-(--accent-strong) transition-all duration-500 relative before:absolute before:-inset-1 before:rounded-[20px] before:border before:border-(--accent)/20 before:-z-10">
+        <div className="bg-(--background) rounded-2xl shadow-lg border ring-2 ring-(--accent) hover:shadow-xl hover:ring-(--accent-strong) transition-all duration-500 relative before:absolute before:-inset-1 before:rounded-[20px] before:border before:border-(--accent)/20 before:-z-10 backdrop-blur-md">
           <ul className="flex flex-col py-2">
             <li>
               <Link
