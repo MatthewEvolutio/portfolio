@@ -134,7 +134,7 @@ export default function Home() {
               <ImageFallback />
               <div className="flex gap-4">
                 <a
-                  href="https://github.com/yourusername"
+                  href="https://github.com/MatthewEvolutio"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="social-btn flex h-12 w-12 items-center justify-center rounded-full bg-foreground text-[#002b36] transition-all duration-300 hover:scale-[1.05] hover:bg-(--btn-hover) dark:bg-(--accent) dark:text-[#002b36] dark:hover:bg-(--accent-strong)"
@@ -147,7 +147,7 @@ export default function Home() {
                   <span className="sr-only">GitHub</span>
                 </a>
                 <a
-                  href="https://linkedin.com/in/yourusername"
+                  href="https://www.linkedin.com/in/matthew-horan-9a4216202/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="social-btn flex h-12 w-12 items-center justify-center rounded-full bg-foreground text-[#002b36] transition-all duration-300 hover:scale-[1.05] hover:bg-(--btn-hover) dark:bg-(--accent) dark:text-[#002b36] dark:hover:bg-(--accent-strong)"

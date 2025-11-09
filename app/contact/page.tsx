@@ -137,7 +137,7 @@ export default function Contact() {
                     />
                   </a>
                   <a
-                    href="https://linkedin.com/in/yourusername"
+                    href="https://www.linkedin.com/in/matthew-horan-9a4216202/"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="social-btn flex h-10 w-10 items-center justify-center rounded-full bg-foreground text-[#002b36] transition-all duration-300 hover:scale-[1.05] hover:bg-(--btn-hover) dark:bg-(--accent) dark:text-[#002b36] dark:hover:bg-(--accent-strong)"
