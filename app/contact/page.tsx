@@ -41,6 +41,13 @@ export default function Contact() {
         setSubmitStatus("error");
         return;
       }
+      // Extra diagnostics for production mismatch
+      console.log("EmailJS env present?", {
+        hasPublicKey: !!emailJsPublicKey,
+        hasServiceId: !!emailJsServiceId,
+        hasTemplateId: !!emailJsTemplateId,
+        nodeEnv: process.env.NODE_ENV,
+      });
 
       const result = await emailjs.send(emailJsServiceId, emailJsTemplateId, {
         from_name: formData.name,
@@ -49,7 +56,13 @@ export default function Contact() {
       });
       console.log("EmailJS result", result);
 
-      // Treat any resolved result as success; SDK rejects on actual failure
+      // Some versions include status/text; if provided and not 200 treat as error
+      const status: any = (result as any)?.status;
+      const text: any = (result as any)?.text;
+      if (status && status !== 200) {
+        throw new Error(`Non-200 response: ${status} ${text || ''}`.trim());
+      }
+
       setFormData({ name: "", email: "", message: "" });
       formEl?.reset();
       setErrorText(null);
@@ -207,7 +220,7 @@ export default function Contact() {
               </button>
 
               {submitStatus === "success" && (
-                <p className="text-sm dark:text-(--accent)">Thanks! Your message was sent. I’ll get back to you shortly.</p>
+                <p className="text-sm dark:text-(--accent)">Thanks! Your message was sent via EmailJS and is on its way to my inbox.</p>
               )}
               {submitStatus === "error" && (
                 <div className="text-sm text-red-600">
