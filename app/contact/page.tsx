@@ -58,10 +58,13 @@ export default function Contact() {
         nodeEnv: process.env.NODE_ENV,
       });
 
+      // Include a timestamp with the message for template usage ({{sent_at}})
+      const time = new Date().toISOString();
       const result = await emailjs.send(emailJsServiceId, emailJsTemplateId, {
         from_name: formData.name,
         reply_to: formData.email,
         message: formData.message,
+        time,
       });
       console.log("EmailJS result", result);
 
