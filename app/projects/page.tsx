@@ -3,8 +3,11 @@
 import Card from "../components/Card";
 import Image from "next/image";
 import { assetUrl } from "@/lib/utils";
+import { useState } from "react";
 
 export default function Projects() {
+  const [activePdf, setActivePdf] = useState<string | null>(null);
+
   return (
     <div className="flex min-h-screen items-start justify-center font-sans dark:bg-background px-4 py-12">
       <main className="w-full max-w-5xl flex flex-col gap-8">
@@ -25,17 +28,16 @@ export default function Projects() {
                 <p className="text-sm dark:text-(--muted) mb-4">
                   A comprehensive collection of my graphic design work, including branding, layout, and visual identity projects.
                 </p>
-                <a
-                  href={assetUrl("/projects/graphicdesign/Portfolio.pdf")}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <button
+                  onClick={() => setActivePdf(assetUrl("/projects/graphicdesign/Portfolio.pdf"))}
                   className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-(--accent) text-[#002b36] hover:bg-(--accent-strong) transition-all"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                   </svg>
                   View Portfolio
-                </a>
+                </button>
               </Card>
             </div>
           </div>
@@ -97,17 +99,16 @@ export default function Projects() {
                 <p className="text-sm dark:text-(--muted) mb-4">
                   View the full A1 portfolio featuring all digital imaging projects and detailed case studies.
                 </p>
-                <a
-                  href={assetUrl("/projects/digitalimage/A1 Portfolio Matthew.pdf")}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <button
+                  onClick={() => setActivePdf(assetUrl("/projects/digitalimage/A1 Portfolio Matthew.pdf"))}
                   className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-(--accent) text-[#002b36] hover:bg-(--accent-strong) transition-all"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                   </svg>
                   View Full Portfolio
-                </a>
+                </button>
               </Card>
             </div>
           </div>
@@ -137,6 +138,36 @@ export default function Projects() {
             </div>
           </div>
         </Card>
+
+        {/* PDF Viewer Modal */}
+        {activePdf && (
+          <div 
+            className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-background/80 p-4"
+            onClick={() => setActivePdf(null)}
+          >
+            <div 
+              className="relative w-full h-full max-w-6xl max-h-[90vh]"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                onClick={() => setActivePdf(null)}
+                className="absolute -top-12 right-0 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-background text-(--accent) hover:bg-(--accent) hover:text-background transition-all shadow-lg ring-2 ring-(--accent)"
+                aria-label="Close PDF viewer"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+              <div className="w-full h-full bg-background rounded-lg overflow-hidden shadow-2xl ring-2 ring-(--accent)">
+                <iframe
+                  src={activePdf}
+                  className="w-full h-full"
+                  title="PDF Viewer"
+                />
+              </div>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );
