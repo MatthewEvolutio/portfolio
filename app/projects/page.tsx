@@ -276,17 +276,19 @@ export default function Projects() {
           <div className="mb-8">
             <h2 className="text-2xl font-semibold dark:text-(--accent) mb-4">Graphic Design</h2>
             <ScrollableSection>
-              <Card variant="sub" className="shrink-0 w-[400px] snap-center">
+              <Card variant="sub" className="group shrink-0 w-[400px] snap-center">
                 <h3 className="text-lg font-medium mb-3 dark:text-(--accent)">Portfolio PDF</h3>
                 <div
-                  className="mb-4 cursor-pointer"
+                  className="mb-3 w-full cursor-pointer rounded-lg overflow-hidden bg-background/50 flex items-center justify-center transition-all duration-300 ease-out h-60 group-hover:h-96"
                   onClick={() => setActivePdf(assetUrl("/projects/graphicdesign/Portfolio.pdf"))}
                 >
-                  <PdfPreview filePath="/projects/graphicdesign/Portfolio.pdf" height={480} />
+                  <div className="w-full h-full">
+                    <PdfPreview filePath="/projects/graphicdesign/Portfolio.pdf" height="100%" />
+                  </div>
                 </div>
                 <button
                   onClick={() => setActivePdf(assetUrl("/projects/graphicdesign/Portfolio.pdf"))}
-                  className="w-full inline-flex justify-center items-center gap-2 px-4 py-3 rounded-lg bg-(--accent) text-(--accent-on) hover:bg-(--accent-strong) transition-all text-base font-medium mb-4"
+                  className="w-full inline-flex justify-center items-center gap-2 px-4 py-3 rounded-lg bg-(--accent) text-(--accent-on) hover:bg-(--accent-strong) transition-all text-base font-medium mb-0 group-hover:mb-4"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -294,9 +296,11 @@ export default function Projects() {
                   </svg>
                   View Portfolio
                 </button>
-                <p className="text-sm dark:text-(--muted)">
-                  A comprehensive collection of my graphic design work, including branding, layout, and visual identity projects.
-                </p>
+                <div className="transition-all duration-300 ease-out max-h-0 opacity-0 overflow-hidden group-hover:max-h-32 group-hover:opacity-100">
+                  <p className="text-sm dark:text-(--muted)">
+                    A comprehensive collection of my graphic design work, including branding, layout, and visual identity projects.
+                  </p>
+                </div>
               </Card>
             </ScrollableSection>
           </div>
@@ -305,52 +309,54 @@ export default function Projects() {
           <div className="mb-8">
             <h2 className="text-2xl font-semibold dark:text-(--accent) mb-4">Digital Imaging</h2>
             <ScrollableSection>
-              <Card variant="sub" className="shrink-0 w-[400px] snap-center">
+              <Card variant="sub" className="group shrink-0 w-[400px] snap-center">
                 <h3 className="text-lg font-medium mb-3 dark:text-(--accent)">Album Cover Design</h3>
                 <div
-                  className="mb-3 rounded-lg overflow-hidden bg-background/50 cursor-pointer hover:opacity-90 transition-opacity"
+                  className="mb-3 h-60 w-full rounded-lg overflow-hidden bg-background/50 cursor-pointer hover:opacity-90 transition-opacity flex items-center justify-center"
                   onClick={() => setActiveImage(assetUrl("/projects/digitalimage/Album cover.PNG"))}
                 >
                   <Image
                     src={assetUrl("/projects/digitalimage/Album cover.PNG")}
                     alt="Album Cover Design"
-                    width={600}
-                    height={600}
-                    className="w-full h-auto object-cover"
+                    width={1200}
+                    height={800}
+                    className="w-full h-full object-contain"
                   />
                 </div>
                 <button
                   onClick={() => setActiveImage(assetUrl("/projects/digitalimage/Album cover.PNG"))}
-                  className="w-full inline-flex justify-center items-center gap-2 px-4 py-3 rounded-lg bg-(--accent) text-(--accent-on) hover:bg-(--accent-strong) transition-all text-base font-medium mb-4"
+                  className="w-full inline-flex justify-center items-center gap-2 px-4 py-3 rounded-lg bg-(--accent) text-(--accent-on) hover:bg-(--accent-strong) transition-all text-base font-medium mb-0 group-hover:mb-4"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 06 0z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                   </svg>
                   View Image
                 </button>
-                <p className="text-sm dark:text-(--muted)">
-                  Creative album artwork featuring photo manipulation and compositing techniques.
-                </p>
+                <div className="transition-all duration-300 ease-out max-h-0 opacity-0 overflow-hidden group-hover:max-h-20 group-hover:opacity-100">
+                  <p className="text-sm dark:text-(--muted)">
+                    Creative album artwork featuring photo manipulation and compositing techniques.
+                  </p>
+                </div>
               </Card>
 
-              <Card variant="sub" className="shrink-0 w-[400px] snap-center">
+              <Card variant="sub" className="group shrink-0 w-[400px] snap-center">
                 <h3 className="text-lg font-medium mb-3 dark:text-(--accent)">Business Card Design</h3>
                 <div
-                  className="mb-3 rounded-lg overflow-hidden bg-background/50 cursor-pointer hover:opacity-90 transition-opacity"
+                  className="mb-3 h-60 w-full rounded-lg overflow-hidden bg-background/50 cursor-pointer hover:opacity-90 transition-opacity flex items-center justify-center"
                   onClick={() => setActiveImage(assetUrl("/projects/digitalimage/Business card.PNG"))}
                 >
                   <Image
                     src={assetUrl("/projects/digitalimage/Business card.PNG")}
                     alt="Business Card Design"
-                    width={600}
-                    height={400}
-                    className="w-full h-auto object-cover"
+                    width={1200}
+                    height={800}
+                    className="w-full h-full object-contain"
                   />
                 </div>
                 <button
                   onClick={() => setActiveImage(assetUrl("/projects/digitalimage/Business card.PNG"))}
-                  className="w-full inline-flex justify-center items-center gap-2 px-4 py-3 rounded-lg bg-(--accent) text-(--accent-on) hover:bg-(--accent-strong) transition-all text-base font-medium mb-4"
+                  className="w-full inline-flex justify-center items-center gap-2 px-4 py-3 rounded-lg bg-(--accent) text-(--accent-on) hover:bg-(--accent-strong) transition-all text-base font-medium mb-0 group-hover:mb-4"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -358,28 +364,31 @@ export default function Projects() {
                   </svg>
                   View Image
                 </button>
-                <p className="text-sm dark:text-(--muted)">
-                  Professional business card design with attention to typography and layout.
-                </p>
+                <div className="transition-all duration-300 ease-out max-h-0 opacity-0 overflow-hidden group-hover:max-h-20 group-hover:opacity-100">
+                  <p className="text-sm dark:text-(--muted)">
+                    Professional business card design with attention to typography and layout.
+                  </p>
+                </div>
+
               </Card>
 
-              <Card variant="sub" className="shrink-0 w-[400px] snap-center">
+              <Card variant="sub" className="group shrink-0 w-[400px] snap-center">
                 <h3 className="text-lg font-medium mb-3 dark:text-(--accent)">Tramore Postcard</h3>
                 <div
-                  className="mb-3 rounded-lg overflow-hidden bg-background/50 cursor-pointer hover:opacity-90 transition-opacity"
+                  className="mb-3 h-60 w-full rounded-lg overflow-hidden bg-background/50 cursor-pointer hover:opacity-90 transition-opacity flex items-center justify-center"
                   onClick={() => setActiveImage(assetUrl("/projects/digitalimage/Tramore Postcard.png"))}
                 >
                   <Image
                     src={assetUrl("/projects/digitalimage/Tramore Postcard.png")}
                     alt="Tramore Postcard"
-                    width={600}
-                    height={400}
-                    className="w-full h-auto object-cover"
+                    width={1200}
+                    height={800}
+                    className="w-full h-full object-contain"
                   />
                 </div>
                 <button
                   onClick={() => setActiveImage(assetUrl("/projects/digitalimage/Tramore Postcard.png"))}
-                  className="w-full inline-flex justify-center items-center gap-2 px-4 py-3 rounded-lg bg-(--accent) text-(--accent-on) hover:bg-(--accent-strong) transition-all text-base font-medium mb-4"
+                  className="w-full inline-flex justify-center items-center gap-2 px-4 py-3 rounded-lg bg-(--accent) text-(--accent-on) hover:bg-(--accent-strong) transition-all text-base font-medium mb-0 group-hover:mb-4"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -387,22 +396,27 @@ export default function Projects() {
                   </svg>
                   View Image
                 </button>
-                <p className="text-sm dark:text-(--muted)">
-                  Scenic postcard design showcasing photo retouching and colour grading.
-                </p>
+                <div className="transition-all duration-300 ease-out max-h-0 opacity-0 overflow-hidden group-hover:max-h-20 group-hover:opacity-100">
+                  <p className="text-sm dark:text-(--muted)">
+                    Scenic postcard design showcasing photo retouching and colour grading.
+                  </p>
+                </div>
+
               </Card>
 
-              <Card variant="sub" className="shrink-0 w-[400px] snap-center">
+              <Card variant="sub" className="group shrink-0 w-[400px] snap-center">
                 <h3 className="text-lg font-medium mb-3 dark:text-(--accent)">Complete Portfolio</h3>
                 <div
-                  className="mb-4 cursor-pointer"
+                  className="mb-3 w-full cursor-pointer rounded-lg overflow-hidden bg-background/50 transition-all duration-300 ease-out h-60 group-hover:h-96"
                   onClick={() => setActivePdf(assetUrl("/projects/digitalimage/A1 Portfolio Matthew.pdf"))}
                 >
-                  <PdfPreview filePath="/projects/digitalimage/A1 Portfolio Matthew.pdf" height={480} />
+                  <div className="w-full h-full">
+                    <PdfPreview filePath="/projects/digitalimage/A1 Portfolio Matthew.pdf" height="100%" />
+                  </div>
                 </div>
                 <button
                   onClick={() => setActivePdf(assetUrl("/projects/digitalimage/A1 Portfolio Matthew.pdf"))}
-                  className="w-full inline-flex justify-center items-center gap-2 px-4 py-3 rounded-lg bg-(--accent) text-(--accent-on) hover:bg-(--accent-strong) transition-all text-base font-medium mb-4"
+                  className="w-full inline-flex justify-center items-center gap-2 px-4 py-3 rounded-lg bg-(--accent) text-(--accent-on) hover:bg-(--accent-strong) transition-all text-base font-medium mb-0 group-hover:mb-4"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -410,9 +424,12 @@ export default function Projects() {
                   </svg>
                   View Full Portfolio
                 </button>
-                <p className="text-sm dark:text-(--muted)">
-                  View the full A1 portfolio featuring all digital imaging projects and detailed case studies.
-                </p>
+                <div className="transition-all duration-300 ease-out max-h-0 opacity-0 overflow-hidden group-hover:max-h-32 group-hover:opacity-100">
+                  <p className="text-sm dark:text-(--muted)">
+                    View the full A1 portfolio featuring all digital imaging projects and detailed case studies.
+                  </p>
+                </div>
+
               </Card>
             </ScrollableSection>
           </div>
@@ -421,29 +438,31 @@ export default function Projects() {
           <div>
             <h2 className="text-2xl font-semibold dark:text-(--accent) mb-4">Web Development</h2>
             <ScrollableSection>
-              <Card variant="sub" className="shrink-0 w-[400px] mb-8 snap-center">
+              <Card variant="sub" className="group shrink-0 w-[400px] mb-8 snap-center">
                 <h3 className="text-lg font-medium mb-3 dark:text-(--accent)">Node.js Web Application</h3>
-                <div className="mb-4 rounded-lg overflow-hidden bg-background/50 border border-(--accent)/20">
+                <div className="mb-3 w-full rounded-lg overflow-hidden bg-background/50 border border-(--accent)/20 flex items-center justify-center transition-all duration-300 ease-out h-60 group-hover:h-[500px]">
                   <iframe
                     ref={nodeIframeRef}
                     src="https://webapp-phi-sooty.vercel.app/start"
-                    className="w-full h-[600px] border-0 themed-scrollbar"
+                    className="w-full h-full border-0 themed-scrollbar"
                     title="Node.js Web Application"
                     sandbox="allow-scripts allow-same-origin allow-forms"
                   />
                 </div>
                 <button
                   onClick={() => setActiveWebApp(true)}
-                  className="w-full inline-flex justify-center items-center gap-2 px-4 py-3 rounded-lg bg-(--accent) text-(--accent-on) hover:bg-(--accent-strong) transition-all text-base font-medium mb-4"
+                  className="w-full inline-flex justify-center items-center gap-2 px-4 py-3 rounded-lg bg-(--accent) text-(--accent-on) hover:bg-(--accent-strong) transition-all text-base font-medium mb-0 group-hover:mb-4"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                   </svg>
                   Open Full Site
                 </button>
-                <p className="text-sm dark:text-(--muted)">
-                  Full-stack web application built with Node.js, Handlebars templating, and Fomantic UI for a modern, responsive interface.
-                </p>
+                <div className="transition-all duration-300 ease-out max-h-0 opacity-0 overflow-hidden group-hover:max-h-32 group-hover:opacity-100">
+                  <p className="text-sm dark:text-(--muted)">
+                    Full-stack web application built with Node.js, Handlebars templating, and Fomantic UI for a modern, responsive interface.
+                  </p>
+                </div>
               </Card>
             </ScrollableSection>
           </div>

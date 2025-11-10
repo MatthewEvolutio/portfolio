@@ -8,7 +8,7 @@ import "@react-pdf-viewer/core/lib/styles/index.css";
 
 interface PdfPreviewProps {
   filePath: string; // relative to public; will be passed through assetUrl
-  height?: number; // px height of the preview container
+  height?: number | string; // px height of the preview container or "100%" for full container
 }
 
 // A scrollable, themed PDF preview showing the full document inside a fixed-height box
@@ -26,7 +26,7 @@ export default function PdfPreview({ filePath, height = 480 }: PdfPreviewProps) 
   return (
     <div
       className="rounded-lg border-2 border-(--accent)/40 bg-(--background) shadow-lg shadow-(--accent)/10"
-      style={{ height }}
+      style={{ height: typeof height === 'number' ? `${height}px` : height }}
     >
       <div className="flex flex-col h-full">
         {/* Controls */}
