@@ -5,7 +5,138 @@ import dynamic from "next/dynamic";
 const PdfPreview = dynamic(() => import("../components/PdfPreview"), { ssr: false });
 import Image from "next/image";
 import { assetUrl } from "@/lib/utils";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Children } from "react";
+
+// Scrollable section component with left/right navigation
+function ScrollableSection({ children }: { children: React.ReactNode }) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+  const rafRef = useRef<number | null>(null);
+  const tickingRef = useRef(false);
+  const childCount = Children.count(children);
+  const isSingle = childCount <= 1;
+
+  const updateSideFlags = () => {
+    const c = scrollRef.current; if (!c) return;
+    const { scrollLeft, scrollWidth, clientWidth } = c;
+    setCanScrollLeft(scrollLeft > 0);
+    setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
+  };
+
+  const animateCards = () => {
+    const container = scrollRef.current;
+    if (!container) return;
+    const cards = Array.from(container.querySelectorAll('.snap-center')) as HTMLElement[];
+    if (!cards.length) return;
+    const containerCenter = container.scrollLeft + container.clientWidth / 2;
+    cards.forEach(el => {
+      const center = el.offsetLeft + el.offsetWidth / 2;
+      const distPx = Math.abs(center - containerCenter);
+      const norm = Math.min(distPx / (el.offsetWidth * 1.2), 1);
+      const blur = norm * 4; // up to 4px
+      const scale = 1 - norm * 0.08;
+      const opacity = 1 - norm * 0.45;
+      el.style.transition = 'filter 160ms ease, transform 160ms ease, opacity 160ms ease';
+      el.style.filter = `blur(${blur.toFixed(2)}px)`;
+      el.style.transform = `scale(${scale.toFixed(3)})`;
+      el.style.opacity = opacity.toFixed(3);
+      el.style.pointerEvents = norm < 0.35 ? 'auto' : 'none';
+    });
+  };
+
+  const requestUpdate = () => {
+    if (tickingRef.current) return;
+    tickingRef.current = true;
+    rafRef.current = window.requestAnimationFrame(() => {
+      updateSideFlags();
+      animateCards();
+      tickingRef.current = false;
+    });
+  };
+
+  useEffect(() => {
+    if (!isSingle) requestUpdate();
+    const handleResize = () => requestUpdate();
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      if (rafRef.current) cancelAnimationFrame(rafRef.current!);
+    };
+  }, [isSingle]);
+
+  const scroll = (direction: 'left' | 'right') => {
+    if (!scrollRef.current) return;
+    const amt = scrollRef.current.clientWidth * 0.8;
+    scrollRef.current.scrollBy({ left: direction === 'left' ? -amt : amt, behavior: 'smooth' });
+    requestUpdate();
+    setTimeout(requestUpdate, 180);
+    setTimeout(requestUpdate, 360);
+  };
+
+  return (
+    <div className="relative group overflow-hidden">
+      {/* Narrow side fades without backdrop blur (blur handled per-card) */}
+      {canScrollLeft && (
+        <div className="absolute left-0 top-0 bottom-0 w-16 bg-linear-to-r from-background to-transparent z-5 pointer-events-none" />
+      )}
+      {canScrollRight && (
+        <div className="absolute right-0 top-0 bottom-0 w-20 bg-linear-to-l from-background to-transparent z-5 pointer-events-none" />
+      )}
+
+      {/* Left scroll button */}
+      {canScrollLeft && (
+        <button
+          onClick={() => scroll('left')}
+          className="absolute left-2 top-1/2 -translate-y-1/2 z-10 h-10 w-10 flex items-center justify-center rounded-full bg-(--accent) text-(--accent-on) hover:bg-(--accent-strong) transition-all shadow-lg opacity-0 group-hover:opacity-100"
+          aria-label="Scroll left"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+      )}
+
+      {/* Scrollable container with centered start and snap scrolling (disabled if single card) */}
+      {isSingle ? (
+        <div
+          ref={scrollRef}
+          className="flex justify-center gap-6 py-6"
+        >
+          {children}
+        </div>
+      ) : (
+        <div
+          ref={scrollRef}
+          onScroll={requestUpdate}
+          className="flex gap-6 overflow-x-auto scroll-smooth scrollbar-hide py-6 snap-x snap-mandatory"
+          style={{
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none',
+            scrollPadding: '0 calc(50% - 200px)' // Centers cards (400px width / 2)
+          }}
+        >
+          <div className="shrink-0" style={{ width: 'calc(50% - 200px - 12px)' }} />
+          {children}
+          <div className="shrink-0" style={{ width: 'calc(50% - 200px - 12px)' }} />
+        </div>
+      )}
+
+      {/* Right scroll button */}
+      {canScrollRight && (
+        <button
+          onClick={() => scroll('right')}
+          className="absolute right-2 top-1/2 -translate-y-1/2 z-10 h-10 w-10 flex items-center justify-center rounded-full bg-(--accent) text-(--accent-on) hover:bg-(--accent-strong) transition-all shadow-lg opacity-0 group-hover:opacity-100"
+          aria-label="Scroll right"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+      )}
+    </div>
+  );
+}
 
 export default function Projects() {
   const [activePdf, setActivePdf] = useState<string | null>(null);
@@ -144,8 +275,8 @@ export default function Projects() {
           {/* Graphic Design Section */}
           <div className="mb-8">
             <h2 className="text-2xl font-semibold dark:text-(--accent) mb-4">Graphic Design</h2>
-            <div className="flex flex-col gap-6">
-              <Card variant="sub">
+            <ScrollableSection>
+              <Card variant="sub" className="shrink-0 w-[400px] snap-center">
                 <h3 className="text-lg font-medium mb-3 dark:text-(--accent)">Portfolio PDF</h3>
                 <div
                   className="mb-4 cursor-pointer"
@@ -153,12 +284,9 @@ export default function Projects() {
                 >
                   <PdfPreview filePath="/projects/graphicdesign/Portfolio.pdf" height={480} />
                 </div>
-                <p className="text-sm dark:text-(--muted) mb-4">
-                  A comprehensive collection of my graphic design work, including branding, layout, and visual identity projects.
-                </p>
                 <button
                   onClick={() => setActivePdf(assetUrl("/projects/graphicdesign/Portfolio.pdf"))}
-                  className="w-full inline-flex justify-center items-center gap-2 px-4 py-3 rounded-lg bg-(--accent) text-(--accent-on) hover:bg-(--accent-strong) transition-all text-base font-medium"
+                  className="w-full inline-flex justify-center items-center gap-2 px-4 py-3 rounded-lg bg-(--accent) text-(--accent-on) hover:bg-(--accent-strong) transition-all text-base font-medium mb-4"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -166,15 +294,18 @@ export default function Projects() {
                   </svg>
                   View Portfolio
                 </button>
+                <p className="text-sm dark:text-(--muted)">
+                  A comprehensive collection of my graphic design work, including branding, layout, and visual identity projects.
+                </p>
               </Card>
-            </div>
+            </ScrollableSection>
           </div>
 
           {/* Digital Imaging Section */}
           <div className="mb-8">
             <h2 className="text-2xl font-semibold dark:text-(--accent) mb-4">Digital Imaging</h2>
-            <div className="flex flex-col gap-6">
-              <Card variant="sub">
+            <ScrollableSection>
+              <Card variant="sub" className="shrink-0 w-[400px] snap-center">
                 <h3 className="text-lg font-medium mb-3 dark:text-(--accent)">Album Cover Design</h3>
                 <div
                   className="mb-3 rounded-lg overflow-hidden bg-background/50 cursor-pointer hover:opacity-90 transition-opacity"
@@ -188,12 +319,9 @@ export default function Projects() {
                     className="w-full h-auto object-cover"
                   />
                 </div>
-                <p className="text-sm dark:text-(--muted) mb-4">
-                  Creative album artwork featuring photo manipulation and compositing techniques.
-                </p>
                 <button
                   onClick={() => setActiveImage(assetUrl("/projects/digitalimage/Album cover.PNG"))}
-                  className="w-full inline-flex justify-center items-center gap-2 px-4 py-3 rounded-lg bg-(--accent) text-(--accent-on) hover:bg-(--accent-strong) transition-all text-base font-medium"
+                  className="w-full inline-flex justify-center items-center gap-2 px-4 py-3 rounded-lg bg-(--accent) text-(--accent-on) hover:bg-(--accent-strong) transition-all text-base font-medium mb-4"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -201,9 +329,12 @@ export default function Projects() {
                   </svg>
                   View Image
                 </button>
+                <p className="text-sm dark:text-(--muted)">
+                  Creative album artwork featuring photo manipulation and compositing techniques.
+                </p>
               </Card>
 
-              <Card variant="sub">
+              <Card variant="sub" className="shrink-0 w-[400px] snap-center">
                 <h3 className="text-lg font-medium mb-3 dark:text-(--accent)">Business Card Design</h3>
                 <div
                   className="mb-3 rounded-lg overflow-hidden bg-background/50 cursor-pointer hover:opacity-90 transition-opacity"
@@ -217,12 +348,9 @@ export default function Projects() {
                     className="w-full h-auto object-cover"
                   />
                 </div>
-                <p className="text-sm dark:text-(--muted) mb-4">
-                  Professional business card design with attention to typography and layout.
-                </p>
                 <button
                   onClick={() => setActiveImage(assetUrl("/projects/digitalimage/Business card.PNG"))}
-                  className="w-full inline-flex justify-center items-center gap-2 px-4 py-3 rounded-lg bg-(--accent) text-(--accent-on) hover:bg-(--accent-strong) transition-all text-base font-medium"
+                  className="w-full inline-flex justify-center items-center gap-2 px-4 py-3 rounded-lg bg-(--accent) text-(--accent-on) hover:bg-(--accent-strong) transition-all text-base font-medium mb-4"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -230,9 +358,12 @@ export default function Projects() {
                   </svg>
                   View Image
                 </button>
+                <p className="text-sm dark:text-(--muted)">
+                  Professional business card design with attention to typography and layout.
+                </p>
               </Card>
 
-              <Card variant="sub">
+              <Card variant="sub" className="shrink-0 w-[400px] snap-center">
                 <h3 className="text-lg font-medium mb-3 dark:text-(--accent)">Tramore Postcard</h3>
                 <div
                   className="mb-3 rounded-lg overflow-hidden bg-background/50 cursor-pointer hover:opacity-90 transition-opacity"
@@ -246,12 +377,9 @@ export default function Projects() {
                     className="w-full h-auto object-cover"
                   />
                 </div>
-                <p className="text-sm dark:text-(--muted) mb-4">
-                  Scenic postcard design showcasing photo retouching and colour grading.
-                </p>
                 <button
                   onClick={() => setActiveImage(assetUrl("/projects/digitalimage/Tramore Postcard.png"))}
-                  className="w-full inline-flex justify-center items-center gap-2 px-4 py-3 rounded-lg bg-(--accent) text-(--accent-on) hover:bg-(--accent-strong) transition-all text-base font-medium"
+                  className="w-full inline-flex justify-center items-center gap-2 px-4 py-3 rounded-lg bg-(--accent) text-(--accent-on) hover:bg-(--accent-strong) transition-all text-base font-medium mb-4"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -259,9 +387,12 @@ export default function Projects() {
                   </svg>
                   View Image
                 </button>
+                <p className="text-sm dark:text-(--muted)">
+                  Scenic postcard design showcasing photo retouching and colour grading.
+                </p>
               </Card>
 
-              <Card variant="sub">
+              <Card variant="sub" className="shrink-0 w-[400px] snap-center">
                 <h3 className="text-lg font-medium mb-3 dark:text-(--accent)">Complete Portfolio</h3>
                 <div
                   className="mb-4 cursor-pointer"
@@ -269,12 +400,9 @@ export default function Projects() {
                 >
                   <PdfPreview filePath="/projects/digitalimage/A1 Portfolio Matthew.pdf" height={480} />
                 </div>
-                <p className="text-sm dark:text-(--muted) mb-4">
-                  View the full A1 portfolio featuring all digital imaging projects and detailed case studies.
-                </p>
                 <button
                   onClick={() => setActivePdf(assetUrl("/projects/digitalimage/A1 Portfolio Matthew.pdf"))}
-                  className="w-full inline-flex justify-center items-center gap-2 px-4 py-3 rounded-lg bg-(--accent) text-(--accent-on) hover:bg-(--accent-strong) transition-all text-base font-medium"
+                  className="w-full inline-flex justify-center items-center gap-2 px-4 py-3 rounded-lg bg-(--accent) text-(--accent-on) hover:bg-(--accent-strong) transition-all text-base font-medium mb-4"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -282,15 +410,18 @@ export default function Projects() {
                   </svg>
                   View Full Portfolio
                 </button>
+                <p className="text-sm dark:text-(--muted)">
+                  View the full A1 portfolio featuring all digital imaging projects and detailed case studies.
+                </p>
               </Card>
-            </div>
+            </ScrollableSection>
           </div>
 
           {/* Other Categories */}
           <div>
             <h2 className="text-2xl font-semibold dark:text-(--accent) mb-4">Web Development</h2>
-            <div className="flex flex-col gap-6 mb-8">
-              <Card variant="sub">
+            <ScrollableSection>
+              <Card variant="sub" className="shrink-0 w-[400px] mb-8 snap-center">
                 <h3 className="text-lg font-medium mb-3 dark:text-(--accent)">Node.js Web Application</h3>
                 <div className="mb-4 rounded-lg overflow-hidden bg-background/50 border border-(--accent)/20">
                   <iframe
@@ -301,20 +432,20 @@ export default function Projects() {
                     sandbox="allow-scripts allow-same-origin allow-forms"
                   />
                 </div>
-                <p className="text-sm dark:text-(--muted) mb-4">
-                  Full-stack web application built with Node.js, Handlebars templating, and Fomantic UI for a modern, responsive interface.
-                </p>
                 <button
                   onClick={() => setActiveWebApp(true)}
-                  className="w-full inline-flex justify-center items-center gap-2 px-4 py-3 rounded-lg bg-(--accent) text-(--accent-on) hover:bg-(--accent-strong) transition-all text-base font-medium"
+                  className="w-full inline-flex justify-center items-center gap-2 px-4 py-3 rounded-lg bg-(--accent) text-(--accent-on) hover:bg-(--accent-strong) transition-all text-base font-medium mb-4"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                   </svg>
                   Open Full Site
                 </button>
+                <p className="text-sm dark:text-(--muted)">
+                  Full-stack web application built with Node.js, Handlebars templating, and Fomantic UI for a modern, responsive interface.
+                </p>
               </Card>
-            </div>
+            </ScrollableSection>
           </div>
 
           {/* Other Skills */}
