@@ -1,16 +1,17 @@
 /**
  * Returns the base path for assets based on environment
- * In production (GitHub Pages), adds /portfolio prefix
- * In development, returns empty string
+ * In production on GitHub Pages, adds /portfolio prefix
+ * On Vercel or in development, returns empty string
  */
 export function getBasePath(): string {
   const isProd = process.env.NODE_ENV === 'production';
-  return isProd ? '/portfolio' : '';
+  const isVercel = process.env.VERCEL === '1';
+  return isProd && !isVercel ? '/portfolio' : '';
 }
 
 /**
  * Converts an asset path to include the basePath in production
- * Usage: assetUrl('/me.jpg') => '/portfolio/me.jpg' in prod, '/me.jpg' in dev
+ * Usage: assetUrl('/me.jpg') => '/portfolio/me.jpg' on GitHub Pages, '/me.jpg' on Vercel/dev
  */
 export function assetUrl(path: string): string {
   // Ensure path starts with /
