@@ -2,13 +2,14 @@ import type { NextConfig } from 'next'
 
 const isProd = process.env.NODE_ENV === 'production'
 const repoName = 'portfolio' // 👈 must match your GitHub repo exactly
+const isVercel = process.env.VERCEL === '1'
 
 const nextConfig: NextConfig = {
-  output: 'export',            // ⬅️ NEW: replaces `next export`
-  basePath: isProd ? `/${repoName}` : '',
-  assetPrefix: isProd ? `/${repoName}/` : '',
+  output: isVercel ? undefined : 'export',            // ⬅️ NEW: replaces `next export`
+  basePath: isProd && !isVercel ? `/${repoName}` : '',
+  assetPrefix: isProd && !isVercel ? `/${repoName}/` : '',
   images: {
-    unoptimized: true,         // GitHub Pages can't run Next image optimizer
+    unoptimized: !isVercel,         // GitHub Pages can't run Next image optimizer
   },
   // Explicitly expose public runtime envs for client bundle
   env: {
