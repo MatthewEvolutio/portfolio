@@ -9,6 +9,11 @@
   --btn-hover: #1e293b;
 }
 
+/* Cards in particles theme have 80% opacity background */
+.theme-particles .glass-strong {
+  background-color: rgba(10, 25, 47, 0.8) !important;
+}
+
 @import "tailwindcss";
 
 html {
