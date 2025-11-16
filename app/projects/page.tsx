@@ -5,7 +5,161 @@ import dynamic from "next/dynamic";
 const PdfPreview = dynamic(() => import("../components/PdfPreview"), { ssr: false });
 import Image from "next/image";
 import { assetUrl } from "@/lib/utils";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Children } from "react";
+
+// Scrollable section component with left/right navigation
+function ScrollableSection({ children }: { children: React.ReactNode }) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+  const rafRef = useRef<number | null>(null);
+  const tickingRef = useRef(false);
+  const childCount = Children.count(children);
+  const isSingle = childCount <= 1;
+
+  const updateSideFlags = () => {
+    const c = scrollRef.current; if (!c) return;
+    const cards = Array.from(c.querySelectorAll('.snap-center')) as HTMLElement[];
+    if (!cards.length) return;
+
+    const containerCenter = c.scrollLeft + c.clientWidth / 2;
+
+    // Find the currently centered card
+    let closestCard = cards[0];
+    let minDistance = Infinity;
+
+    cards.forEach(card => {
+      const cardCenter = card.offsetLeft + card.offsetWidth / 2;
+      const distance = Math.abs(cardCenter - containerCenter);
+      if (distance < minDistance) {
+        minDistance = distance;
+        closestCard = card;
+      }
+    });
+
+    // Check if we're at first or last card
+    const isFirstCard = closestCard === cards[0];
+    const isLastCard = closestCard === cards[cards.length - 1];
+
+    setCanScrollLeft(!isFirstCard);
+    setCanScrollRight(!isLastCard);
+  };
+
+  const animateCards = () => {
+    const container = scrollRef.current;
+    if (!container) return;
+    const cards = Array.from(container.querySelectorAll('.snap-center')) as HTMLElement[];
+    if (!cards.length) return;
+    const containerCenter = container.scrollLeft + container.clientWidth / 2;
+    cards.forEach(el => {
+      const center = el.offsetLeft + el.offsetWidth / 2;
+      const distPx = Math.abs(center - containerCenter);
+      const norm = Math.min(distPx / (el.offsetWidth * 1.2), 1);
+      const blur = norm * 4; // up to 4px
+      const scale = 1 - norm * 0.08;
+      const opacity = 1 - norm * 0.45;
+      el.style.transition = 'filter 160ms ease, transform 160ms ease, opacity 160ms ease';
+      el.style.filter = `blur(${blur.toFixed(2)}px)`;
+      el.style.transform = `scale(${scale.toFixed(3)})`;
+      el.style.opacity = opacity.toFixed(3);
+      el.style.pointerEvents = norm < 0.35 ? 'auto' : 'none';
+    });
+  };
+
+  const requestUpdate = () => {
+    if (tickingRef.current) return;
+    tickingRef.current = true;
+    rafRef.current = window.requestAnimationFrame(() => {
+      updateSideFlags();
+      animateCards();
+      tickingRef.current = false;
+    });
+  };
+
+  useEffect(() => {
+    if (!isSingle) requestUpdate();
+    const handleResize = () => requestUpdate();
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      if (rafRef.current) cancelAnimationFrame(rafRef.current!);
+    };
+  }, [isSingle]);
+
+  const scroll = (direction: 'left' | 'right') => {
+    if (!scrollRef.current) return;
+    const amt = scrollRef.current.clientWidth * 0.8;
+    scrollRef.current.scrollBy({ left: direction === 'left' ? -amt : amt, behavior: 'smooth' });
+    requestUpdate();
+    setTimeout(requestUpdate, 180);
+    setTimeout(requestUpdate, 360);
+  };
+
+  return (
+    <div className="relative group overflow-hidden">
+      {/* Narrow side fades without backdrop blur (blur handled per-card) */}
+      {canScrollLeft && (
+        <div className="absolute left-0 top-0 bottom-0 w-16 bg-linear-to-r from-background to-transparent z-5 pointer-events-none" />
+      )}
+      {canScrollRight && (
+        <div className="absolute right-0 top-0 bottom-0 w-20 bg-linear-to-l from-background to-transparent z-5 pointer-events-none" />
+      )}
+
+      {/* Left scroll button - always visible but darkened when can't scroll */}
+      {!isSingle && (
+        <button
+          onClick={() => scroll('left')}
+          disabled={!canScrollLeft}
+          className="absolute left-2 top-1/2 -translate-y-1/2 z-10 h-10 w-10 flex items-center justify-center rounded-full bg-(--accent) text-(--accent-on) disabled:opacity-40 disabled:cursor-not-allowed hover:bg-(--accent-strong) transition-all shadow-lg opacity-0 group-hover:opacity-100"
+          aria-label="Scroll left"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+      )}
+
+      {/* Scrollable container with centered start and snap scrolling (disabled if single card) */}
+      {isSingle ? (
+        <div
+          ref={scrollRef}
+          className="flex justify-center gap-6 py-6"
+        >
+          {children}
+        </div>
+      ) : (
+        <div
+          ref={scrollRef}
+          onScroll={requestUpdate}
+          className="flex items-start gap-6 overflow-x-auto scroll-smooth scrollbar-hide py-6 snap-x snap-mandatory"
+          style={{
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none',
+            scrollPadding: '0 calc(50% - 200px)' // Centers cards (400px width / 2)
+          }}
+        >
+          <div className="shrink-0" style={{ width: 'calc(50% - 200px - 12px)' }} />
+          {children}
+          <div className="shrink-0" style={{ width: 'calc(50% - 200px - 12px)' }} />
+        </div>
+      )}
+
+      {/* Right scroll button - always visible but darkened when can't scroll */}
+      {!isSingle && (
+        <button
+          onClick={() => scroll('right')}
+          disabled={!canScrollRight}
+          className="absolute right-2 top-1/2 -translate-y-1/2 z-10 h-10 w-10 flex items-center justify-center rounded-full bg-(--accent) text-(--accent-on) disabled:opacity-40 disabled:cursor-not-allowed hover:bg-(--accent-strong) transition-all shadow-lg opacity-0 group-hover:opacity-100"
+          aria-label="Scroll right"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+      )}
+    </div>
+  );
+}
 
 export default function Projects() {
   const [activePdf, setActivePdf] = useState<string | null>(null);
@@ -144,21 +298,20 @@ export default function Projects() {
           {/* Graphic Design Section */}
           <div className="mb-8">
             <h2 className="text-2xl font-semibold dark:text-(--accent) mb-4">Graphic Design</h2>
-            <div className="flex flex-col gap-6">
-              <Card variant="sub">
+            <ScrollableSection>
+              <Card variant="sub" className="group shrink-0 w-[400px] snap-center">
                 <h3 className="text-lg font-medium mb-3 dark:text-(--accent)">Portfolio PDF</h3>
                 <div
-                  className="mb-4 cursor-pointer"
+                  className="mb-3 w-full cursor-pointer rounded-lg overflow-hidden bg-background/50 flex items-center justify-center transition-all duration-300 ease-out h-60 group-hover:h-96"
                   onClick={() => setActivePdf(assetUrl("/projects/graphicdesign/Portfolio.pdf"))}
                 >
-                  <PdfPreview filePath="/projects/graphicdesign/Portfolio.pdf" height={480} />
+                  <div className="w-full h-full">
+                    <PdfPreview filePath="/projects/graphicdesign/Portfolio.pdf" height="100%" />
+                  </div>
                 </div>
-                <p className="text-sm dark:text-(--muted) mb-4">
-                  A comprehensive collection of my graphic design work, including branding, layout, and visual identity projects.
-                </p>
                 <button
                   onClick={() => setActivePdf(assetUrl("/projects/graphicdesign/Portfolio.pdf"))}
-                  className="w-full inline-flex justify-center items-center gap-2 px-4 py-3 rounded-lg bg-(--accent) text-(--accent-on) hover:bg-(--accent-strong) transition-all text-base font-medium"
+                  className="w-full inline-flex justify-center items-center gap-2 px-4 py-3 rounded-lg bg-(--accent) text-(--accent-on) hover:bg-(--accent-strong) transition-all text-base font-medium mb-0 group-hover:mb-4"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -166,63 +319,67 @@ export default function Projects() {
                   </svg>
                   View Portfolio
                 </button>
+                <div className="transition-all duration-300 ease-out max-h-0 opacity-0 overflow-hidden group-hover:max-h-32 group-hover:opacity-100">
+                  <p className="text-sm dark:text-(--muted)">
+                    A comprehensive collection of my graphic design work, including branding, layout, and visual identity projects.
+                  </p>
+                </div>
               </Card>
-            </div>
+            </ScrollableSection>
           </div>
 
           {/* Digital Imaging Section */}
           <div className="mb-8">
             <h2 className="text-2xl font-semibold dark:text-(--accent) mb-4">Digital Imaging</h2>
-            <div className="flex flex-col gap-6">
-              <Card variant="sub">
+            <ScrollableSection>
+              <Card variant="sub" className="group shrink-0 w-[400px] snap-center self-start">
                 <h3 className="text-lg font-medium mb-3 dark:text-(--accent)">Album Cover Design</h3>
                 <div
-                  className="mb-3 rounded-lg overflow-hidden bg-background/50 cursor-pointer hover:opacity-90 transition-opacity"
+                  className="mb-3 h-60 w-full rounded-lg overflow-hidden bg-background/50 cursor-pointer hover:opacity-90 transition-opacity flex items-center justify-center"
                   onClick={() => setActiveImage(assetUrl("/projects/digitalimage/Album cover.PNG"))}
                 >
                   <Image
                     src={assetUrl("/projects/digitalimage/Album cover.PNG")}
                     alt="Album Cover Design"
-                    width={600}
-                    height={600}
-                    className="w-full h-auto object-cover"
+                    width={1200}
+                    height={800}
+                    className="w-full h-full object-contain"
                   />
                 </div>
-                <p className="text-sm dark:text-(--muted) mb-4">
-                  Creative album artwork featuring photo manipulation and compositing techniques.
-                </p>
                 <button
                   onClick={() => setActiveImage(assetUrl("/projects/digitalimage/Album cover.PNG"))}
-                  className="w-full inline-flex justify-center items-center gap-2 px-4 py-3 rounded-lg bg-(--accent) text-(--accent-on) hover:bg-(--accent-strong) transition-all text-base font-medium"
+                  className="w-full inline-flex justify-center items-center gap-2 px-4 py-3 rounded-lg bg-(--accent) text-(--accent-on) hover:bg-(--accent-strong) transition-all text-base font-medium mb-0 group-hover:mb-4"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 06 0z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                   </svg>
                   View Image
                 </button>
+                <div className="transition-all duration-300 ease-out max-h-0 opacity-0 overflow-hidden group-hover:max-h-20 group-hover:opacity-100">
+                  <p className="text-sm dark:text-(--muted)">
+                    Creative album artwork featuring photo manipulation and compositing techniques.
+                  </p>
+                </div>
               </Card>
 
-              <Card variant="sub">
+              <Card variant="sub" className="group shrink-0 w-[400px] snap-center self-start">
                 <h3 className="text-lg font-medium mb-3 dark:text-(--accent)">Business Card Design</h3>
                 <div
-                  className="mb-3 rounded-lg overflow-hidden bg-background/50 cursor-pointer hover:opacity-90 transition-opacity"
+                  className="mb-3 h-60 w-full rounded-lg overflow-hidden bg-background/50 cursor-pointer hover:opacity-90 transition-opacity flex items-center justify-center"
                   onClick={() => setActiveImage(assetUrl("/projects/digitalimage/Business card.PNG"))}
                 >
                   <Image
                     src={assetUrl("/projects/digitalimage/Business card.PNG")}
                     alt="Business Card Design"
-                    width={600}
-                    height={400}
-                    className="w-full h-auto object-cover"
+                    width={1200}
+                    height={800}
+                    className="w-full h-full object-contain"
                   />
                 </div>
-                <p className="text-sm dark:text-(--muted) mb-4">
-                  Professional business card design with attention to typography and layout.
-                </p>
                 <button
                   onClick={() => setActiveImage(assetUrl("/projects/digitalimage/Business card.PNG"))}
-                  className="w-full inline-flex justify-center items-center gap-2 px-4 py-3 rounded-lg bg-(--accent) text-(--accent-on) hover:bg-(--accent-strong) transition-all text-base font-medium"
+                  className="w-full inline-flex justify-center items-center gap-2 px-4 py-3 rounded-lg bg-(--accent) text-(--accent-on) hover:bg-(--accent-strong) transition-all text-base font-medium mb-0 group-hover:mb-4"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -230,28 +387,31 @@ export default function Projects() {
                   </svg>
                   View Image
                 </button>
+                <div className="transition-all duration-300 ease-out max-h-0 opacity-0 overflow-hidden group-hover:max-h-20 group-hover:opacity-100">
+                  <p className="text-sm dark:text-(--muted)">
+                    Professional business card design with attention to typography and layout.
+                  </p>
+                </div>
+
               </Card>
 
-              <Card variant="sub">
+              <Card variant="sub" className="group shrink-0 w-[400px] snap-center self-start">
                 <h3 className="text-lg font-medium mb-3 dark:text-(--accent)">Tramore Postcard</h3>
                 <div
-                  className="mb-3 rounded-lg overflow-hidden bg-background/50 cursor-pointer hover:opacity-90 transition-opacity"
+                  className="mb-3 h-60 w-full rounded-lg overflow-hidden bg-background/50 cursor-pointer hover:opacity-90 transition-opacity flex items-center justify-center"
                   onClick={() => setActiveImage(assetUrl("/projects/digitalimage/Tramore Postcard.png"))}
                 >
                   <Image
                     src={assetUrl("/projects/digitalimage/Tramore Postcard.png")}
                     alt="Tramore Postcard"
-                    width={600}
-                    height={400}
-                    className="w-full h-auto object-cover"
+                    width={1200}
+                    height={800}
+                    className="w-full h-full object-contain"
                   />
                 </div>
-                <p className="text-sm dark:text-(--muted) mb-4">
-                  Scenic postcard design showcasing photo retouching and colour grading.
-                </p>
                 <button
                   onClick={() => setActiveImage(assetUrl("/projects/digitalimage/Tramore Postcard.png"))}
-                  className="w-full inline-flex justify-center items-center gap-2 px-4 py-3 rounded-lg bg-(--accent) text-(--accent-on) hover:bg-(--accent-strong) transition-all text-base font-medium"
+                  className="w-full inline-flex justify-center items-center gap-2 px-4 py-3 rounded-lg bg-(--accent) text-(--accent-on) hover:bg-(--accent-strong) transition-all text-base font-medium mb-0 group-hover:mb-4"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -259,22 +419,27 @@ export default function Projects() {
                   </svg>
                   View Image
                 </button>
+                <div className="transition-all duration-300 ease-out max-h-0 opacity-0 overflow-hidden group-hover:max-h-20 group-hover:opacity-100">
+                  <p className="text-sm dark:text-(--muted)">
+                    Scenic postcard design showcasing photo retouching and colour grading.
+                  </p>
+                </div>
+
               </Card>
 
-              <Card variant="sub">
+              <Card variant="sub" className="group shrink-0 w-[400px] snap-center self-start">
                 <h3 className="text-lg font-medium mb-3 dark:text-(--accent)">Complete Portfolio</h3>
                 <div
-                  className="mb-4 cursor-pointer"
+                  className="mb-3 w-full cursor-pointer rounded-lg overflow-hidden bg-background/50 transition-all duration-300 ease-out h-60 group-hover:h-96"
                   onClick={() => setActivePdf(assetUrl("/projects/digitalimage/A1 Portfolio Matthew.pdf"))}
                 >
-                  <PdfPreview filePath="/projects/digitalimage/A1 Portfolio Matthew.pdf" height={480} />
+                  <div className="w-full h-full">
+                    <PdfPreview filePath="/projects/digitalimage/A1 Portfolio Matthew.pdf" height="100%" />
+                  </div>
                 </div>
-                <p className="text-sm dark:text-(--muted) mb-4">
-                  View the full A1 portfolio featuring all digital imaging projects and detailed case studies.
-                </p>
                 <button
                   onClick={() => setActivePdf(assetUrl("/projects/digitalimage/A1 Portfolio Matthew.pdf"))}
-                  className="w-full inline-flex justify-center items-center gap-2 px-4 py-3 rounded-lg bg-(--accent) text-(--accent-on) hover:bg-(--accent-strong) transition-all text-base font-medium"
+                  className="w-full inline-flex justify-center items-center gap-2 px-4 py-3 rounded-lg bg-(--accent) text-(--accent-on) hover:bg-(--accent-strong) transition-all text-base font-medium mb-0 group-hover:mb-4"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -282,39 +447,131 @@ export default function Projects() {
                   </svg>
                   View Full Portfolio
                 </button>
+                <div className="transition-all duration-300 ease-out max-h-0 opacity-0 overflow-hidden group-hover:max-h-32 group-hover:opacity-100">
+                  <p className="text-sm dark:text-(--muted)">
+                    View the full A1 portfolio featuring all digital imaging projects and detailed case studies.
+                  </p>
+                </div>
+
               </Card>
-            </div>
+            </ScrollableSection>
           </div>
 
           {/* Other Categories */}
           <div>
             <h2 className="text-2xl font-semibold dark:text-(--accent) mb-4">Web Development</h2>
-            <div className="flex flex-col gap-6 mb-8">
-              <Card variant="sub">
+            <ScrollableSection>
+              <Card variant="sub" className="group shrink-0 w-[400px] mb-8 snap-center self-start">
                 <h3 className="text-lg font-medium mb-3 dark:text-(--accent)">Node.js Web Application</h3>
-                <div className="mb-4 rounded-lg overflow-hidden bg-background/50 border border-(--accent)/20">
+                <div className="mb-3 w-full rounded-lg overflow-hidden bg-background/50 border border-(--accent)/20 flex items-center justify-center transition-all duration-300 ease-out h-60 group-hover:h-[500px]">
                   <iframe
                     ref={nodeIframeRef}
                     src="https://webapp-phi-sooty.vercel.app/start"
-                    className="w-full h-[600px] border-0 themed-scrollbar"
+                    className="w-full h-full border-0 themed-scrollbar"
                     title="Node.js Web Application"
                     sandbox="allow-scripts allow-same-origin allow-forms"
                   />
                 </div>
-                <p className="text-sm dark:text-(--muted) mb-4">
-                  Full-stack web application built with Node.js, Handlebars templating, and Fomantic UI for a modern, responsive interface.
-                </p>
                 <button
                   onClick={() => setActiveWebApp(true)}
-                  className="w-full inline-flex justify-center items-center gap-2 px-4 py-3 rounded-lg bg-(--accent) text-(--accent-on) hover:bg-(--accent-strong) transition-all text-base font-medium"
+                  className="w-full inline-flex justify-center items-center gap-2 px-4 py-3 rounded-lg bg-(--accent) text-(--accent-on) hover:bg-(--accent-strong) transition-all text-base font-medium mb-0 group-hover:mb-4"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                   </svg>
                   Open Full Site
                 </button>
+                <div className="transition-all duration-300 ease-out max-h-0 opacity-0 overflow-hidden group-hover:max-h-32 group-hover:opacity-100">
+                  <p className="text-sm dark:text-(--muted)">
+                    Full-stack web application built with Node.js, Handlebars templating, and Fomantic UI for a modern, responsive interface.
+                  </p>
+                </div>
               </Card>
-            </div>
+
+              <Card variant="sub" className="group shrink-0 w-[400px] mb-8 snap-center self-start">
+                <h3 className="text-lg font-medium mb-3 dark:text-(--accent)">Audio Production Portfolio</h3>
+                <div className="mb-3 w-full rounded-lg overflow-hidden bg-background/50 border border-(--accent)/20 flex items-center justify-center transition-all duration-300 ease-out h-60 group-hover:h-[500px]">
+                  <iframe
+                    src="https://staging.d1ytfm7knbdrsc.amplifyapp.com/"
+                    className="w-full h-full border-0 themed-scrollbar"
+                    title="Audio Production Portfolio"
+                    sandbox="allow-scripts allow-same-origin allow-forms"
+                  />
+                </div>
+                <a
+                  href="https://staging.d1ytfm7knbdrsc.amplifyapp.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full inline-flex justify-center items-center gap-2 px-4 py-3 rounded-lg bg-(--accent) text-(--accent-on) hover:bg-(--accent-strong) transition-all text-base font-medium mb-0 group-hover:mb-4"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                  Open Full Site
+                </a>
+                <div className="transition-all duration-300 ease-out max-h-0 opacity-0 overflow-hidden group-hover:max-h-32 group-hover:opacity-100">
+                  <p className="text-sm dark:text-(--muted)">
+                    Audio production portfolio showcasing music production, sound design, and audio engineering work.
+                  </p>
+                </div>
+              </Card>
+
+              <Card variant="sub" className="group shrink-0 w-[400px] mb-8 snap-center self-start">
+                <h3 className="text-lg font-medium mb-3 dark:text-(--accent)">P5.js Interactive Sketch</h3>
+                <div className="mb-3 w-full rounded-lg overflow-hidden bg-background/50 border border-(--accent)/20 flex items-center justify-center transition-all duration-300 ease-out h-60 group-hover:h-[500px]">
+                  <iframe
+                    src="https://editor.p5js.org/20093995/full/aiB-NiVMF"
+                    className="w-full h-full border-0 themed-scrollbar"
+                    title="P5.js Interactive Sketch"
+                    sandbox="allow-scripts allow-same-origin allow-forms"
+                  />
+                </div>
+                <a
+                  href="https://editor.p5js.org/20093995/full/aiB-NiVMF"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full inline-flex justify-center items-center gap-2 px-4 py-3 rounded-lg bg-(--accent) text-(--accent-on) hover:bg-(--accent-strong) transition-all text-base font-medium mb-0 group-hover:mb-4"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                  Open Full Site
+                </a>
+                <div className="transition-all duration-300 ease-out max-h-0 opacity-0 overflow-hidden group-hover:max-h-32 group-hover:opacity-100">
+                  <p className="text-sm dark:text-(--muted)">
+                    Creative coding project using P5.js for interactive visual programming and generative art.
+                  </p>
+                </div>
+              </Card>
+
+              <Card variant="sub" className="group shrink-0 w-[400px] mb-8 snap-center self-start">
+                <h3 className="text-lg font-medium mb-3 dark:text-(--accent)">Web Development 1 Project</h3>
+                <div className="mb-3 w-full rounded-lg overflow-hidden bg-background/50 border border-(--accent)/20 flex items-center justify-center transition-all duration-300 ease-out h-60 group-hover:h-[500px]">
+                  <iframe
+                    src="https://webdev1-one.vercel.app/"
+                    className="w-full h-full border-0 themed-scrollbar"
+                    title="Web Development 1 Project"
+                    sandbox="allow-scripts allow-same-origin allow-forms"
+                  />
+                </div>
+                <a
+                  href="https://webdev1-one.vercel.app/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full inline-flex justify-center items-center gap-2 px-4 py-3 rounded-lg bg-(--accent) text-(--accent-on) hover:bg-(--accent-strong) transition-all text-base font-medium mb-0 group-hover:mb-4"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                  Open Full Site
+                </a>
+                <div className="transition-all duration-300 ease-out max-h-0 opacity-0 overflow-hidden group-hover:max-h-32 group-hover:opacity-100">
+                  <p className="text-sm dark:text-(--muted)">
+                    Additional web development project highlighting layout, responsive design and component structure.
+                  </p>
+                </div>
+              </Card>
+            </ScrollableSection>
           </div>
 
           {/* Other Skills */}
