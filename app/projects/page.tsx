@@ -19,9 +19,30 @@ function ScrollableSection({ children }: { children: React.ReactNode }) {
 
   const updateSideFlags = () => {
     const c = scrollRef.current; if (!c) return;
-    const { scrollLeft, scrollWidth, clientWidth } = c;
-    setCanScrollLeft(scrollLeft > 0);
-    setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
+    const cards = Array.from(c.querySelectorAll('.snap-center')) as HTMLElement[];
+    if (!cards.length) return;
+
+    const containerCenter = c.scrollLeft + c.clientWidth / 2;
+
+    // Find the currently centered card
+    let closestCard = cards[0];
+    let minDistance = Infinity;
+
+    cards.forEach(card => {
+      const cardCenter = card.offsetLeft + card.offsetWidth / 2;
+      const distance = Math.abs(cardCenter - containerCenter);
+      if (distance < minDistance) {
+        minDistance = distance;
+        closestCard = card;
+      }
+    });
+
+    // Check if we're at first or last card
+    const isFirstCard = closestCard === cards[0];
+    const isLastCard = closestCard === cards[cards.length - 1];
+
+    setCanScrollLeft(!isFirstCard);
+    setCanScrollRight(!isLastCard);
   };
 
   const animateCards = () => {
@@ -84,11 +105,12 @@ function ScrollableSection({ children }: { children: React.ReactNode }) {
         <div className="absolute right-0 top-0 bottom-0 w-20 bg-linear-to-l from-background to-transparent z-5 pointer-events-none" />
       )}
 
-      {/* Left scroll button */}
-      {canScrollLeft && (
+      {/* Left scroll button - always visible but darkened when can't scroll */}
+      {!isSingle && (
         <button
           onClick={() => scroll('left')}
-          className="absolute left-2 top-1/2 -translate-y-1/2 z-10 h-10 w-10 flex items-center justify-center rounded-full bg-(--accent) text-(--accent-on) hover:bg-(--accent-strong) transition-all shadow-lg opacity-0 group-hover:opacity-100"
+          disabled={!canScrollLeft}
+          className="absolute left-2 top-1/2 -translate-y-1/2 z-10 h-10 w-10 flex items-center justify-center rounded-full bg-(--accent) text-(--accent-on) disabled:opacity-40 disabled:cursor-not-allowed hover:bg-(--accent-strong) transition-all shadow-lg opacity-0 group-hover:opacity-100"
           aria-label="Scroll left"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -109,7 +131,7 @@ function ScrollableSection({ children }: { children: React.ReactNode }) {
         <div
           ref={scrollRef}
           onScroll={requestUpdate}
-          className="flex gap-6 overflow-x-auto scroll-smooth scrollbar-hide py-6 snap-x snap-mandatory"
+          className="flex items-start gap-6 overflow-x-auto scroll-smooth scrollbar-hide py-6 snap-x snap-mandatory"
           style={{
             scrollbarWidth: 'none',
             msOverflowStyle: 'none',
@@ -122,11 +144,12 @@ function ScrollableSection({ children }: { children: React.ReactNode }) {
         </div>
       )}
 
-      {/* Right scroll button */}
-      {canScrollRight && (
+      {/* Right scroll button - always visible but darkened when can't scroll */}
+      {!isSingle && (
         <button
           onClick={() => scroll('right')}
-          className="absolute right-2 top-1/2 -translate-y-1/2 z-10 h-10 w-10 flex items-center justify-center rounded-full bg-(--accent) text-(--accent-on) hover:bg-(--accent-strong) transition-all shadow-lg opacity-0 group-hover:opacity-100"
+          disabled={!canScrollRight}
+          className="absolute right-2 top-1/2 -translate-y-1/2 z-10 h-10 w-10 flex items-center justify-center rounded-full bg-(--accent) text-(--accent-on) disabled:opacity-40 disabled:cursor-not-allowed hover:bg-(--accent-strong) transition-all shadow-lg opacity-0 group-hover:opacity-100"
           aria-label="Scroll right"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -309,7 +332,7 @@ export default function Projects() {
           <div className="mb-8">
             <h2 className="text-2xl font-semibold dark:text-(--accent) mb-4">Digital Imaging</h2>
             <ScrollableSection>
-              <Card variant="sub" className="group shrink-0 w-[400px] snap-center">
+              <Card variant="sub" className="group shrink-0 w-[400px] snap-center self-start">
                 <h3 className="text-lg font-medium mb-3 dark:text-(--accent)">Album Cover Design</h3>
                 <div
                   className="mb-3 h-60 w-full rounded-lg overflow-hidden bg-background/50 cursor-pointer hover:opacity-90 transition-opacity flex items-center justify-center"
@@ -340,7 +363,7 @@ export default function Projects() {
                 </div>
               </Card>
 
-              <Card variant="sub" className="group shrink-0 w-[400px] snap-center">
+              <Card variant="sub" className="group shrink-0 w-[400px] snap-center self-start">
                 <h3 className="text-lg font-medium mb-3 dark:text-(--accent)">Business Card Design</h3>
                 <div
                   className="mb-3 h-60 w-full rounded-lg overflow-hidden bg-background/50 cursor-pointer hover:opacity-90 transition-opacity flex items-center justify-center"
@@ -372,7 +395,7 @@ export default function Projects() {
 
               </Card>
 
-              <Card variant="sub" className="group shrink-0 w-[400px] snap-center">
+              <Card variant="sub" className="group shrink-0 w-[400px] snap-center self-start">
                 <h3 className="text-lg font-medium mb-3 dark:text-(--accent)">Tramore Postcard</h3>
                 <div
                   className="mb-3 h-60 w-full rounded-lg overflow-hidden bg-background/50 cursor-pointer hover:opacity-90 transition-opacity flex items-center justify-center"
@@ -404,7 +427,7 @@ export default function Projects() {
 
               </Card>
 
-              <Card variant="sub" className="group shrink-0 w-[400px] snap-center">
+              <Card variant="sub" className="group shrink-0 w-[400px] snap-center self-start">
                 <h3 className="text-lg font-medium mb-3 dark:text-(--accent)">Complete Portfolio</h3>
                 <div
                   className="mb-3 w-full cursor-pointer rounded-lg overflow-hidden bg-background/50 transition-all duration-300 ease-out h-60 group-hover:h-96"
@@ -438,7 +461,7 @@ export default function Projects() {
           <div>
             <h2 className="text-2xl font-semibold dark:text-(--accent) mb-4">Web Development</h2>
             <ScrollableSection>
-              <Card variant="sub" className="group shrink-0 w-[400px] mb-8 snap-center">
+              <Card variant="sub" className="group shrink-0 w-[400px] mb-8 snap-center self-start">
                 <h3 className="text-lg font-medium mb-3 dark:text-(--accent)">Node.js Web Application</h3>
                 <div className="mb-3 w-full rounded-lg overflow-hidden bg-background/50 border border-(--accent)/20 flex items-center justify-center transition-all duration-300 ease-out h-60 group-hover:h-[500px]">
                   <iframe
@@ -461,6 +484,34 @@ export default function Projects() {
                 <div className="transition-all duration-300 ease-out max-h-0 opacity-0 overflow-hidden group-hover:max-h-32 group-hover:opacity-100">
                   <p className="text-sm dark:text-(--muted)">
                     Full-stack web application built with Node.js, Handlebars templating, and Fomantic UI for a modern, responsive interface.
+                  </p>
+                </div>
+              </Card>
+
+              <Card variant="sub" className="group shrink-0 w-[400px] mb-8 snap-center self-start">
+                <h3 className="text-lg font-medium mb-3 dark:text-(--accent)">Audio Production Portfolio</h3>
+                <div className="mb-3 w-full rounded-lg overflow-hidden bg-background/50 border border-(--accent)/20 flex items-center justify-center transition-all duration-300 ease-out h-60 group-hover:h-[500px]">
+                  <iframe
+                    src="https://staging.d1ytfm7knbdrsc.amplifyapp.com/"
+                    className="w-full h-full border-0 themed-scrollbar"
+                    title="Audio Production Portfolio"
+                    sandbox="allow-scripts allow-same-origin allow-forms"
+                  />
+                </div>
+                <a
+                  href="https://staging.d1ytfm7knbdrsc.amplifyapp.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full inline-flex justify-center items-center gap-2 px-4 py-3 rounded-lg bg-(--accent) text-(--accent-on) hover:bg-(--accent-strong) transition-all text-base font-medium mb-0 group-hover:mb-4"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                  Open Full Site
+                </a>
+                <div className="transition-all duration-300 ease-out max-h-0 opacity-0 overflow-hidden group-hover:max-h-32 group-hover:opacity-100">
+                  <p className="text-sm dark:text-(--muted)">
+                    Audio production portfolio showcasing music production, sound design, and audio engineering work.
                   </p>
                 </div>
               </Card>
