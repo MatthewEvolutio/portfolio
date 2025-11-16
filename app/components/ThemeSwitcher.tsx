@@ -22,6 +22,11 @@ const themes = [
     key: "light",
     className: "theme-light",
   },
+  {
+    name: "Particles (Animated)",
+    key: "particles",
+    className: "theme-particles",
+  },
 ];
 
 export default function ThemeSwitcher() {

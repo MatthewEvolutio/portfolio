@@ -2,14 +2,16 @@ import type { NextConfig } from 'next'
 
 const isProd = process.env.NODE_ENV === 'production'
 const isVercel = process.env.VERCEL === '1'
-const repoName = 'portfolio' // 👈 must match your GitHub repo exactly
+const repoName = 'portfolio' // must match your GitHub repo exactly
 
 const nextConfig: NextConfig = {
-  output: isVercel ? undefined : 'export',  // Use SSR on Vercel, static export for GitHub Pages
+  // Use SSR on Vercel, static export on GitHub Pages
+  output: isVercel ? undefined : 'export',
   basePath: isProd && !isVercel ? `/${repoName}` : '',
   assetPrefix: isProd && !isVercel ? `/${repoName}/` : '',
   images: {
-    unoptimized: !isVercel,    // Allow Next.js image optimization on Vercel
+    // Allow image optimization on Vercel; disable for GitHub Pages
+    unoptimized: !isVercel,
   },
   // Explicitly expose public runtime envs for client bundle
   env: {
