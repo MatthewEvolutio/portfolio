@@ -515,6 +515,62 @@ export default function Projects() {
                   </p>
                 </div>
               </Card>
+
+              <Card variant="sub" className="group shrink-0 w-[400px] mb-8 snap-center self-start">
+                <h3 className="text-lg font-medium mb-3 dark:text-(--accent)">P5.js Interactive Sketch</h3>
+                <div className="mb-3 w-full rounded-lg overflow-hidden bg-background/50 border border-(--accent)/20 flex items-center justify-center transition-all duration-300 ease-out h-60 group-hover:h-[500px]">
+                  <iframe
+                    src="https://editor.p5js.org/20093995/full/aiB-NiVMF"
+                    className="w-full h-full border-0 themed-scrollbar"
+                    title="P5.js Interactive Sketch"
+                    sandbox="allow-scripts allow-same-origin allow-forms"
+                  />
+                </div>
+                <a
+                  href="https://editor.p5js.org/20093995/full/aiB-NiVMF"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full inline-flex justify-center items-center gap-2 px-4 py-3 rounded-lg bg-(--accent) text-(--accent-on) hover:bg-(--accent-strong) transition-all text-base font-medium mb-0 group-hover:mb-4"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                  Open Full Site
+                </a>
+                <div className="transition-all duration-300 ease-out max-h-0 opacity-0 overflow-hidden group-hover:max-h-32 group-hover:opacity-100">
+                  <p className="text-sm dark:text-(--muted)">
+                    Creative coding project using P5.js for interactive visual programming and generative art.
+                  </p>
+                </div>
+              </Card>
+
+              <Card variant="sub" className="group shrink-0 w-[400px] mb-8 snap-center self-start">
+                <h3 className="text-lg font-medium mb-3 dark:text-(--accent)">Web Development 1 Project</h3>
+                <div className="mb-3 w-full rounded-lg overflow-hidden bg-background/50 border border-(--accent)/20 flex items-center justify-center transition-all duration-300 ease-out h-60 group-hover:h-[500px]">
+                  <iframe
+                    src="https://webdev1-one.vercel.app/"
+                    className="w-full h-full border-0 themed-scrollbar"
+                    title="Web Development 1 Project"
+                    sandbox="allow-scripts allow-same-origin allow-forms"
+                  />
+                </div>
+                <a
+                  href="https://webdev1-one.vercel.app/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full inline-flex justify-center items-center gap-2 px-4 py-3 rounded-lg bg-(--accent) text-(--accent-on) hover:bg-(--accent-strong) transition-all text-base font-medium mb-0 group-hover:mb-4"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                  Open Full Site
+                </a>
+                <div className="transition-all duration-300 ease-out max-h-0 opacity-0 overflow-hidden group-hover:max-h-32 group-hover:opacity-100">
+                  <p className="text-sm dark:text-(--muted)">
+                    Additional web development project highlighting layout, responsive design and component structure.
+                  </p>
+                </div>
+              </Card>
             </ScrollableSection>
           </div>
 
